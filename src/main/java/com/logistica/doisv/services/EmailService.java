@@ -44,7 +44,7 @@ public class EmailService {
                             width: 100%%;
                             max-width: 600px;
                             margin: 20px auto;
-                            background-color: #1fff17ff;
+                            background-color: rgb(255, 255, 255);
                             border-radius: 12px;
                             overflow: hidden;
                             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
