@@ -47,7 +47,7 @@ public class SolicitacaoController {
 
     @PostMapping(value = "/criar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<SolicitacaoResumidaDTO> criarSolicitacao(@Valid @RequestPart("solicitacao") CriarSolicitacaoDTO dto,
-                                                                   @RequestPart("anexos") List<MultipartFile> anexos,
+                                                                   @RequestPart(value = "anexos", required = false) List<MultipartFile> anexos,
                                                                    @AuthenticationPrincipal AcessoDTO usuarioLogado) throws GeneralSecurityException, IOException {
 
         return ResponseEntity.ok(service.registrarSolicitacao(dto, anexos, usuarioLogado.getIdVenda()));
@@ -77,7 +77,7 @@ public class SolicitacaoController {
     @PutMapping(value = "/{id}")
     public ResponseEntity<SolicitacaoResumidaDTO> editarSolicitacao(@PathVariable Long id,
                                                                     @Valid @RequestPart("solicitacao") CriarSolicitacaoDTO dto,
-                                                                    @RequestPart("anexos") List<MultipartFile> anexos,
+                                                                    @RequestPart(value = "anexos", required = false) List<MultipartFile> anexos,
                                                                     @AuthenticationPrincipal AcessoDTO usuarioLogado) throws GeneralSecurityException, IOException {
 
         return ResponseEntity.ok(service.editarSolicitacao(id, dto, anexos, usuarioLogado.getIdLoja()));
