@@ -96,4 +96,44 @@ public class SolicitacaoValidador {
                     solicitacao.getStatus().name()));
         }
     }
+
+    public void validarConsumidor(Solicitacao solicitacao, Long idConsumidor){
+        var consumidorValido = solicitacao.getConsumidor().getIdConsumidor().equals(idConsumidor);
+
+        if (!consumidorValido){
+            throw new AssociacaoInvalidaException("Você não tem permissão para alterar essa solicitação.");
+        }
+    }
+
+    public void validarCancelamentoConsumidor(Solicitacao solicitacao, Long idConsumidor){
+        validarConsumidor(solicitacao, idConsumidor);
+
+        var validarStatus = solicitacao.getStatusSolicitacao() == StatusSolicitacao.EM_TRANSITO ||
+                solicitacao.getStatusSolicitacao() == StatusSolicitacao.CONCLUIDA ||
+                solicitacao.getStatusSolicitacao() == StatusSolicitacao.CANCELADA ||
+                solicitacao.getStatus() == Status.INATIVO;
+
+        if (validarStatus){
+            throw new RegraNegocioException(String.format("A solicitação de %s ID %s não pode mais ser cancelada no status atual: " +
+                            "\nStatus Solicitação: %s" +
+                            "\nStatus: %s.",
+                    solicitacao.getTipoSolicitacao().getDescricao().toLowerCase(),
+                    solicitacao.getId(),
+                    solicitacao.getStatusSolicitacao().name(),
+                    solicitacao.getStatus().name()));
+        }
+    }
+
+    public void validarEdicaoConsumidor(Solicitacao solicitacao, Long idConsumidor){
+        validarConsumidor(solicitacao, idConsumidor);
+
+        var validarStatusSolicitacao = solicitacao.getStatusSolicitacao() != StatusSolicitacao.PENDENTE;
+        var validarStatus = solicitacao.getStatus() == Status.INATIVO;
+
+        if (validarStatusSolicitacao || validarStatus){
+            throw new RegraNegocioException(String.format("A solicitação de %s ID %s não pode mais ser alterada.",
+                    solicitacao.getTipoSolicitacao().getDescricao().toLowerCase(),
+                    solicitacao.getId()));
+        }
+    }
 }

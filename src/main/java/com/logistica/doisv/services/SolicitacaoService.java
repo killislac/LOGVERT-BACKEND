@@ -54,6 +54,11 @@ public class SolicitacaoService {
     }
 
     @Transactional(readOnly = true)
+    public Page<SolicitacaoResumidaDTO> buscarPorConsumidor(Pageable pageable, Long idConsumidor){
+        return repository.listarSolicitacoesPorConsumidor(pageable, idConsumidor);
+    }
+
+    @Transactional(readOnly = true)
     public SolicitacaoDetalhadaDTO buscarPorId(Long id, Long idLoja){
         Solicitacao solicitacao = repository.buscarCompletoPorId(id).orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada"));
         validador.validarLoja(solicitacao, idLoja);
@@ -137,12 +142,12 @@ public class SolicitacaoService {
     }
 
     @Transactional
-    public SolicitacaoResumidaDTO editarSolicitacao(Long id, CriarSolicitacaoDTO dto, List<MultipartFile> anexos, Long idLoja) throws GeneralSecurityException, IOException {
+    public SolicitacaoResumidaDTO editarSolicitacao(Long id, CriarSolicitacaoDTO dto, List<MultipartFile> anexos, Long idConsumidor) throws GeneralSecurityException, IOException {
         validarTipoAnexo(anexos);
 
-        Solicitacao solicitacao = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada"));
+        Solicitacao solicitacao = repository.buscarCompletoPorId(id).orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada"));
 
-        validador.validarAprovacaoSolicitacao(solicitacao, idLoja);
+        validador.validarEdicaoConsumidor(solicitacao, idConsumidor);
         validador.validarStatusVenda(solicitacao.getVenda(), solicitacao.getTipoSolicitacao().getDescricao().toLowerCase());
         validador.validarPrazoSolicitacao(solicitacao.getVenda(), solicitacao.getTipoSolicitacao());
         validador.validarQuantidade(dto.quantidade(), solicitacao.getQuantidade(), solicitacao.getTipoSolicitacao().getDescricao().toLowerCase());
@@ -183,17 +188,18 @@ public class SolicitacaoService {
 
 
     @Transactional
-    public SolicitacaoResumidaDTO cancelarSolicitacao(Long idSolicitacao, CriarSolicitacaoDTO dto, Long idLoja) throws GeneralSecurityException, IOException {
-        Solicitacao solicitacao = repository.findById(idSolicitacao).orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada"));
+    public SolicitacaoResumidaDTO cancelarSolicitacao(Long idSolicitacao, CriarSolicitacaoDTO dto, Long idConsumidor) throws GeneralSecurityException, IOException {
+        Solicitacao solicitacao = repository.buscarCompletoPorId(idSolicitacao).orElseThrow(() -> new ResourceNotFoundException("Solicitação não encontrada"));
 
-        validador.validarCancelamento(solicitacao, idLoja);
+        validador.validarCancelamentoConsumidor(solicitacao, idConsumidor);
 
-        ItemVenda itemVenda = buscarItemVendaPorId(dto.idItem(), solicitacao.getVenda().getItensVenda());
+        ItemVenda itemVenda = solicitacao.getItemVenda();
 
         HistoricoSolicitacao historico = criarHistorico(StatusSolicitacao.CANCELADA, solicitacao,
                 String.format("Solicitação cancelada - %s", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))));
 
         solicitacao.getHistoricos().add(historico);
+        solicitacao.setDataAtualizacao(historico.getDataAtualizacao());
 
         itemVenda.setStatus(Status.ATIVO);
         itemVenda.setDetalhes("");

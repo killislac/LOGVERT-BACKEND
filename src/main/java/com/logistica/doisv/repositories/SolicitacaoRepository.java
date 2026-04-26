@@ -38,6 +38,17 @@ public interface SolicitacaoRepository extends JpaRepository<Solicitacao, Long> 
     Optional<Solicitacao> buscarCompletoPorId(@Param("id") Long id);
 
 
+    @Query("""
+    SELECT new com.logistica.doisv.dto.registro_solicitacao.SolicitacaoResumidaDTO(
+        s.id, c.nome, v.id, s.tipoSolicitacao, s.motivo, s.dataSolicitacao,
+        s.dataAtualizacao, s.statusSolicitacao, s.status)
+        FROM Solicitacao s
+        JOIN s.consumidor c
+        JOIN s.venda v
+        WHERE c.id = :idConsumidor
+        """)
+    Page<SolicitacaoResumidaDTO> listarSolicitacoesPorConsumidor(Pageable pageable, @Param("idConsumidor") Long idConsumidor);
+
     @Query(value = """
             SELECT s.* FROM tb_solicitacao s
             JOIN tb_venda v

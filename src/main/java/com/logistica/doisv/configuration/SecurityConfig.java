@@ -49,6 +49,7 @@ public class SecurityConfig {
 
                         // ===================== ROTAS CONSUMIDOR =====================
                         .requestMatchers("/logvert/vendas/me").hasRole("CONSUMIDOR")
+                        .requestMatchers("/logvert/solicitacoes/me").hasRole("CONSUMIDOR")
                         .requestMatchers(HttpMethod.PUT, "/logvert/solicitacoes/{id}").hasRole("CONSUMIDOR")
                         .requestMatchers("/logvert/solicitacoes/criar").hasRole("CONSUMIDOR")
                         .requestMatchers("/logvert/solicitacoes/cancelar/{id}").hasRole("CONSUMIDOR")

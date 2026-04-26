@@ -39,6 +39,12 @@ public class SolicitacaoController {
         return ResponseEntity.ok(service.buscarTodos(pageable, usuarioLogado.getIdLoja()));
     }
 
+    @GetMapping(value = "/me")
+    public ResponseEntity<Page<SolicitacaoResumidaDTO>> buscarMinhasSolicitacoes(Pageable pageable, @AuthenticationPrincipal AcessoDTO usuarioLogado){
+
+        return ResponseEntity.ok(service.buscarPorConsumidor(pageable, usuarioLogado.getIdConsumidor()));
+    }
+
     @GetMapping(value = "/{id}")
     public ResponseEntity<SolicitacaoDetalhadaDTO> buscarSolicitacaoPorId(@PathVariable Long id, @AuthenticationPrincipal AcessoDTO usuarioLogado){
 
@@ -80,7 +86,7 @@ public class SolicitacaoController {
                                                                     @RequestPart(value = "anexos", required = false) List<MultipartFile> anexos,
                                                                     @AuthenticationPrincipal AcessoDTO usuarioLogado) throws GeneralSecurityException, IOException {
 
-        return ResponseEntity.ok(service.editarSolicitacao(id, dto, anexos, usuarioLogado.getIdLoja()));
+        return ResponseEntity.ok(service.editarSolicitacao(id, dto, anexos, usuarioLogado.getIdConsumidor()));
     }
 
     @PutMapping(value = "/cancelar/{id}")
@@ -88,6 +94,6 @@ public class SolicitacaoController {
                                                                       @Valid @RequestBody CriarSolicitacaoDTO dto,
                                                                       @AuthenticationPrincipal AcessoDTO usuarioLogado) throws GeneralSecurityException, IOException {
 
-        return ResponseEntity.ok(service.cancelarSolicitacao(id, dto, usuarioLogado.getIdLoja()));
+        return ResponseEntity.ok(service.cancelarSolicitacao(id, dto, usuarioLogado.getIdConsumidor()));
     }
 }
